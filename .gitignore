@@ -13,3 +13,5 @@ vio_docker/outputs/
 Recordings/
 session_*/
 *.log
+cloudflared.yml
+.cloudflared/

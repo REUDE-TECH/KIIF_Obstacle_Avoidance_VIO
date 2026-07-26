@@ -2,34 +2,37 @@
 
 Render cannot use the OAK-D. For remote viewing, run Streamlit **on the PC with the camera** and tunnel it out.
 
-## One-time
+## Stable hostname (your Cloudflare account)
 
-1. Plug in OAK-D.
-2. Detach from Docker/WSL if needed:
-   ```powershell
-   usbipd list
-   usbipd detach --busid <BUSID>
-   ```
-3. Install tunnel client:
-   ```bat
-   install_remote_tunnel.bat
-   ```
+Dashboard: https://dash.cloudflare.com/f2ed2ffed361450d643350ed475ae9b1/home
 
-## Every session
+You need a **domain already added** to that Cloudflare account.
+
+```bat
+setup_named_tunnel.bat
+```
+
+1. Browser opens → authorize Cloudflare (same account as the dashboard).
+2. Creates tunnel `kiif-oak-streamlit`.
+3. Route DNS (example):
+
+```bat
+cloudflared tunnel route dns kiif-oak-streamlit oak.yourdomain.com
+```
+
+4. Edit `cloudflared.yml` → set `hostname:` to that same name.
+5. Run:
+
+```bat
+run_remote_named.bat
+```
+
+Manage tunnels: [Zero Trust → Networks → Tunnels](https://one.dash.cloudflare.com/).
+
+## Quick tunnel (no domain)
 
 ```bat
 run_remote.bat
 ```
 
-1. A Streamlit window starts (camera pipeline on this PC).
-2. Cloudflare prints a public URL: `https://xxxx.trycloudflare.com`
-3. Open that URL on your phone or another laptop.
-4. In the app: **Start pipeline** (not demo).
-
-Keep both windows open. Closing the tunnel window ends remote access.
-
-## Notes
-
-- Quick tunnels (`*.trycloudflare.com`) are temporary; URL changes each run.
-- Anyone with the URL can open the UI while the tunnel is up — stop the tunnel when done.
-- For a stable private URL, use Tailscale Serve or a named Cloudflare tunnel later.
+Gives a temporary `https://xxxx.trycloudflare.com` URL (changes each run).
