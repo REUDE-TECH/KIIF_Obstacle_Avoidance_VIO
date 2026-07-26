@@ -6,28 +6,23 @@ Render cannot use the OAK-D. For remote viewing, run Streamlit **on the PC with 
 
 Dashboard: https://dash.cloudflare.com/f2ed2ffed361450d643350ed475ae9b1/home
 
-You need a **domain already added** to that Cloudflare account.
+You need a **domain already added** to that Cloudflare account (e.g. `reude.tech`).
 
 ```bat
 setup_named_tunnel.bat
 ```
 
-1. Browser opens → authorize Cloudflare (same account as the dashboard).
-2. Creates tunnel `kiif-oak-streamlit`.
-3. Route DNS (example):
+Creates tunnel **`REUDETECH`** and hostname **`reudetech.reude.tech`**.
 
-```bat
-cloudflared tunnel route dns kiif-oak-streamlit oak.yourdomain.com
-```
+If DNS route fails, add `reude.tech` to Cloudflare first, or edit `HOSTNAME` in `setup_named_tunnel.bat`.
 
-4. Edit `cloudflared.yml` → set `hostname:` to that same name.
-5. Run:
+Then run:
 
 ```bat
 run_remote_named.bat
 ```
 
-Manage tunnels: [Zero Trust → Networks → Tunnels](https://one.dash.cloudflare.com/).
+Public URL: `https://reudetech.reude.tech`
 
 ## Quick tunnel (no domain)
 
