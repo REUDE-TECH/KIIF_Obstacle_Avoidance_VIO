@@ -1,0 +1,9 @@
+streamlit>=1.33.0
+depthai>=2.25.0,<3.0.0
+opencv-python>=4.9.0
+numpy>=1.24.0
+pandas>=2.0.0
+plotly>=5.18.0
+ultralytics>=8.1.0
+torch>=2.0.0
+Pillow>=10.0.0

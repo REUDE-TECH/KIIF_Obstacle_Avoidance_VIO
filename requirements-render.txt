@@ -1,0 +1,7 @@
+# Lightweight cloud deps — no depthai / torch / ultralytics (demo feed only)
+streamlit>=1.33.0,<2
+numpy>=1.24.0,<3
+opencv-python-headless>=4.9.0,<5
+pandas>=2.0.0,<3
+plotly>=5.18.0,<6
+Pillow>=10.0.0,<12

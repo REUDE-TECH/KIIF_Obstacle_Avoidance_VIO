@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: oak-obstacle-avoidance
+    runtime: python
+    plan: free
+    rootDir: .
+    buildCommand: pip install -r requirements-render.txt
+    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
+    envVars:
+      - key: DEMO_MODE
+        value: "1"
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: STREAMLIT_BROWSER_GATHER_USAGE_STATS
+        value: "false"
