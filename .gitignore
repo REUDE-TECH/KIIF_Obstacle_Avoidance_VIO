@@ -4,6 +4,7 @@ __pycache__/
 venv/
 .env
 outputs/
+vio_docker/outputs/
 *.pt
 *.onnx
 .DS_Store

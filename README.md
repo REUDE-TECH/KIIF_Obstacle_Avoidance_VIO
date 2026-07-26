@@ -12,7 +12,10 @@ Unified Windows-native stack:
 Docker Desktop + `usbipd` loses the OAK-D during Myriad firmware USB re-enumeration
 (`X_LINK_DEVICE_NOT_FOUND`). This app talks to the camera **natively on Windows**.
 
-Full C++ **VINS-Fusion** (`vio_docker`) remains the Linux / vehicle target.
+Full C++ **VINS-Fusion** lives in [`vio_docker/`](vio_docker/) (Linux / vehicle target).
+Windows Docker Desktop + `usbipd` is not reliable for OAK-D boot; use native `run.bat` here,
+or Linux with `vio_docker/ubuntu/`.
+
 This app produces compatible trajectory-style CSV for analysis.
 
 ## Run
@@ -45,11 +48,19 @@ Open http://localhost:8501
 
 ## Deploy on Render (demo only)
 
-Cloud has no USB camera. Use the lightweight demo build:
+Same Render service: [oak-obstacle-avoidance](https://oak-obstacle-avoidance.onrender.com)  
+Dashboard: `srv-d9inor7avr4c73b5mtm0`
 
-See **[RENDER_DEPLOY.md](RENDER_DEPLOY.md)** — `render.yaml` + `requirements-render.txt`.
+Cloud has no USB camera — demo feed only. See **[RENDER_DEPLOY.md](RENDER_DEPLOY.md)**.
 
-On the live site: click **Start demo**.
+`vio_docker/` is for local/Linux builds; it is **not** started on Render.
+
+## VIO Docker (local / Linux)
+
+```text
+vio_docker/windows/   # attach_oak, build, run (Windows + Docker Desktop)
+vio_docker/ubuntu/    # native Linux USB path (recommended for full VINS)
+```
 
 ## Copy back to team share
 

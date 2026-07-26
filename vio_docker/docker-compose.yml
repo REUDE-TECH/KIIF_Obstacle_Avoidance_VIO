@@ -1,0 +1,57 @@
+# Shared /tmp so feature_tracker ↔ vins_fusion ↔ mavlink_udp can use
+# Unix sockets (/tmp/chobits_*) on Docker Desktop (host networking is unreliable there).
+volumes:
+  vio_ipc:
+
+services:
+  feature_tracker:
+    build: .
+    image: oak-d-vio:latest
+    container_name: feature_tracker
+    privileged: true
+    # DepthAI needs USB character devices (major 189)
+    device_cgroup_rules:
+      - "c 189:* rmw"
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb
+      - vio_ipc:/tmp
+      - ./outputs:/outputs
+    working_dir: /root/nongps_pro/oak_d_vins_cpp
+    command: ./feature_tracker
+    # On bare-metal Linux USB this is stable. On Windows Docker Desktop + usbipd,
+    # DepthAI's Myriad USB re-enumeration often yields X_LINK_DEVICE_NOT_FOUND.
+    restart: "no"
+
+  vins_fusion:
+    build: .
+    image: oak-d-vio:latest
+    container_name: vins_fusion
+    privileged: true
+    depends_on:
+      - feature_tracker
+    volumes:
+      - vio_ipc:/tmp
+      - ./outputs:/outputs
+    working_dir: /root/nongps_pro/VINS-Fusion/vins_estimator
+    command: ./vins_fusion oak_d.yaml
+    restart: "no"
+
+  # Needs a real ArduPilot UART (/dev/ttyAMA0 etc). Optional on a Windows PC
+  # with no flight controller — enable with: docker compose --profile fc up -d
+  mavlink_udp:
+    profiles: ["fc"]
+    build: .
+    image: oak-d-vio:latest
+    container_name: mavlink_udp
+    privileged: true
+    depends_on:
+      - vins_fusion
+    volumes:
+      - vio_ipc:/tmp
+      - ./outputs:/outputs
+    # Map host serial if you have an FC (uncomment and set the COM→tty path):
+    # devices:
+    #   - /dev/ttyUSB0:/dev/ttyAMA0
+    working_dir: /root/nongps_pro/mavlink-udp-proxy
+    command: ./mavlink_udp
+    restart: "no"

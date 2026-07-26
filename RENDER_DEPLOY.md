@@ -1,6 +1,12 @@
 # Deploy OAK Obstacle Avoidance on Render
 
-Cloud runs **demo mode only** (synthetic camera + avoidance). A physical OAK-D cannot attach to Render.
+**Existing service (same dashboard):** [oak-obstacle-avoidance](https://dashboard.render.com/web/srv-d9inor7avr4c73b5mtm0)  
+**Live URL:** https://oak-obstacle-avoidance.onrender.com  
+
+Repo: https://github.com/REUDE-TECH/KIIF_Obstacle_Avoidance_VIO  
+
+Cloud runs **demo mode only** (synthetic camera + avoidance). A physical OAK-D cannot attach to Render.  
+`vio_docker/` in this repo is for local/Linux VINS — not used by the Render web service.
 
 ## 1. Put this folder on GitHub
 
