@@ -27,6 +27,15 @@ cd C:\Users\rkraj\oa_obstacle_avoidance
 
 Open http://localhost:8501
 
+### Remote access (camera still on this PC)
+
+```bat
+install_remote_tunnel.bat   REM once
+run_remote.bat              REM Streamlit + Cloudflare tunnel URL
+```
+
+See **[REMOTE_ACCESS.md](REMOTE_ACCESS.md)**. Render still cannot use USB.
+
 ## Tabs
 
 | Tab | Purpose |
