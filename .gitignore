@@ -13,5 +13,9 @@ vio_docker/outputs/
 Recordings/
 session_*/
 *.log
+*.log.out
 cloudflared.yml
+REMOTE_URL.txt
+tunnel_url.log
+tunnel_url.log.out
 .cloudflared/

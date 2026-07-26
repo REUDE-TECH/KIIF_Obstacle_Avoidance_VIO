@@ -1,0 +1,8 @@
+﻿# Activate after: setup_named_tunnel.bat (authorize Cloudflare in browser)
+# Intended public URL: https://reudetech.reude.tech
+tunnel: REUDETECH
+# credentials-file filled by setup_named_tunnel.bat
+ingress:
+  - hostname: reudetech.reude.tech
+    service: http://127.0.0.1:8501
+  - service: http_status:404
