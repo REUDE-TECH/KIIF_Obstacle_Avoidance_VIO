@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # OAK-D Obstacle Avoidance Pipeline
 
 Unified Windows-native stack:
@@ -58,3 +59,6 @@ When `Z:\Engineering Team\...` is available:
 ```powershell
 xcopy /E /I /Y C:\Users\rkraj\oa_obstacle_avoidance "Z:\Engineering Team\10.1 Obstacle avoidance\camera_check\oa_pipeline"
 ```
+=======
+# KIIF_Obstacle_Avoidance_VIO
+>>>>>>> 517f6c2581101f1162451a6e77ca87eac279523f
