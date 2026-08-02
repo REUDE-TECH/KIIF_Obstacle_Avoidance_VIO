@@ -1,14 +1,166 @@
 # VIO Docker Setup
 
-This repository contains the Dockerized environment for the VIO stack.
+This repository contains the Dockerized environment for the VIO stack
+(`feature_tracker` → `vins_fusion` → optional `mavlink_udp`).
 
 ## Documentation
-
-For more detailed information, please refer to the documents in the `docs/` directory:
 
 - [Setup Guide](docs/setup_guide.md)
 - [Architecture](docs/architecture.md)
 - [Troubleshooting](docs/troubleshooting.md)
+
+---
+
+## Local host workflow (this Windows PC)
+
+Use this section for day-to-day testing on
+`Z:\Engineering Team\10.1 Obstacle avoidance\camera_check`.
+
+### Which path should I use?
+
+| Goal | Use | URL / result |
+| ---- | --- | ------------ |
+| Live OAK-D + avoidance UI on this PC | **A — Native Streamlit** (recommended) | http://localhost:8501 |
+| Full C++ VINS-Fusion in Docker | **B — vio_docker** | containers + `vio_docker\outputs\` |
+| Cloud demo (no USB camera) | Render | https://oak-obstacle-avoidance.onrender.com |
+
+> **Important (Windows + Docker Desktop):** DepthAI re-enumerates the OAK-D USB
+> during boot. `usbipd` often drops the device → `feature_tracker` dies with
+> `X_LINK_DEVICE_NOT_FOUND`. Prefer **Path A** on this laptop; use **Path B** on
+> Linux (native USB) or when Docker attach is known-good.
+
+---
+
+### Path A — Native localhost dashboard (recommended)
+
+Camera stays on **Windows** (must **not** be Attached to WSL/Docker).
+
+#### Step-by-step
+
+1. **Plug in** the OAK-D (USB3 port). Wait ~3 seconds.
+2. **Free the camera from Docker/WSL** (if you ran vio_docker earlier):
+
+   ```powershell
+   usbipd list
+   # If STATE is Attached:
+   usbipd detach --busid <BUSID>
+   ```
+
+   Confirm STATE is `Shared` or `Not shared` — **not** `Attached`.
+
+3. **Stop anything else** using the camera / port 8501 (old Streamlit, Docker VIO).
+
+4. **Start the dashboard**:
+
+   ```powershell
+   cd "C:\Users\rkraj\oa_obstacle_avoidance"
+   .\run.bat
+   ```
+
+   Team-share copy (same app):
+
+   ```powershell
+   cd "Z:\Engineering Team\10.1 Obstacle avoidance\camera_check\oa_pipeline"
+   .\run.bat
+   ```
+
+5. Open **http://localhost:8501** in the browser.
+
+6. In the sidebar:
+   - Uncheck **Force demo mode** if you want the real camera
+   - Click **Start pipeline**
+
+7. Watch tabs: **Live Pipeline** → **Avoidance** → **Detections** → **VIO / Pose** → **Sessions**.
+
+8. **Stop:** click **Stop** in the UI, then close the Streamlit terminal (or Ctrl+C).
+
+#### Checklist (Path A)
+
+- [ ] OAK-D plugged in (USB3)
+- [ ] `usbipd list` → device **not** Attached
+- [ ] http://localhost:8501 loads
+- [ ] **Start pipeline** shows live preview (not only demo)
+
+---
+
+### Path B — vio_docker on local host (Windows Docker)
+
+Full VINS-Fusion stack. On this PC it may still fail after attach; keep Path A as fallback.
+
+#### First-time only
+
+| Step | Action |
+| ---- | ------ |
+| 1 | Double-click `windows\install_prereqs.bat` (UAC) — WSL2, Docker Desktop, usbipd |
+| 2 | Reboot if Windows asks |
+| 3 | Open **Docker Desktop** → wait until Engine is green (WSL 2) |
+| 4 | `windows\build.bat` — builds `oak-d-vio:latest` (long first build) |
+
+#### Every session (step-by-step)
+
+1. **Close Path A** — stop Streamlit on :8501 so Windows releases the OAK-D.
+
+2. **Plug in** OAK-D (USB3).
+
+3. **Attach camera into docker-desktop** (Admin / UAC):
+
+   ```powershell
+   cd "Z:\Engineering Team\10.1 Obstacle avoidance\camera_check\vio_docker"
+   .\windows\attach_oak.bat
+   ```
+
+   - Leave the **AUTO-ATTACH** PowerShell window **open**
+   - Confirm: `usbipd list` shows **Attached**
+   - Confirm: `wsl -d docker-desktop -e lsusb` shows `03e7`
+
+4. **Run VIO** (feature_tracker + vins_fusion):
+
+   ```powershell
+   .\windows\run.bat
+   ```
+
+   - Log windows open for `feature_tracker` and `vins_fusion`
+   - Press **`s`** in the launcher terminal to stop
+
+5. **Check health**
+   - Good: `feature_tracker` keeps running; files appear under `outputs\session_*`
+   - Bad: `X_LINK_DEVICE_NOT_FOUND` / exit 139 → Windows usbipd limit; switch to **Path A**
+
+6. **After Docker VIO** — free the camera for Path A again:
+
+   ```powershell
+   usbipd detach --busid <BUSID>
+   ```
+
+#### Checklist (Path B)
+
+- [ ] Docker Desktop green
+- [ ] `docker images oak-d-vio` shows `oak-d-vio:latest`
+- [ ] Streamlit / other DepthAI apps closed
+- [ ] `attach_oak.bat` → Attached + `03e7` in docker-desktop `lsusb`
+- [ ] AUTO-ATTACH window left open
+- [ ] `run.bat` → no `X_LINK_DEVICE_NOT_FOUND`
+
+#### Manual USB attach (optional)
+
+```powershell
+usbipd list
+usbipd bind --busid <BUSID>
+usbipd attach --wsl docker-desktop --auto-attach --busid <BUSID>
+wsl -d docker-desktop -e lsusb   # must show 03e7
+```
+
+---
+
+### Quick decision flow
+
+```text
+Need live camera UI on this laptop?
+  └─ YES → Path A (oa_pipeline / run.bat) → http://localhost:8501
+Need full C++ VINS-Fusion outputs?
+  └─ Linux PC/vehicle → ubuntu/run.sh (best)
+  └─ This Windows PC → Path B (may fail) → if X_LINK → Path A
+```
 
 ---
 
@@ -152,51 +304,22 @@ The repository includes `.bat` files in the `windows\` folder. Just double-click
 
 ---
 
-## Camera-feed testing (VIO / obstacle sensing)
+## Camera-feed / obstacle sensing signals
 
-### Local host console (recommended on this PC)
-
-**Unified dashboard** (camera + VIO in one app):
-
-```powershell
-cd "Z:\Engineering Team\10.1 Obstacle avoidance\camera_check\dashboard"
-.\run.bat
-```
-
-Open **http://localhost:8501** — tabs:
-
-| Tab | Content |
-| --- | ------- |
-| 📷 Camera Recorder | Live OAK-D preview + recording (former :8501 app) |
-| 🛰️ VIO Deploy & Run | Host check → install → attach → build → run/stop (former :8505) |
-| 📊 VIO Results | Videos, depth/feature images, trajectory / IMU / MAVLink plots |
-
-Standalone VIO-only UI (optional):
-
-```powershell
-cd "Z:\Engineering Team\10.1 Obstacle avoidance\camera_check\vio_docker\host_ui"
-.\run.bat
-```
-
-This stack is **Visual-Inertial Odometry + stereo depth**, not a separate YOLO-style detector.
-For real-time obstacle avoidance / GPS-denied navigation testing:
+This Docker stack is **Visual-Inertial Odometry + stereo depth**, not YOLO.
+For real-time testing on this PC, prefer the **Local host workflow → Path A** above
+(native dashboard includes detection + avoidance).
 
 | Signal | Where it comes from | Use |
 | ------ | ------------------- | --- |
 | 6-DOF pose + velocity | `vins_fusion` → `outputs/.../pose/trajectory.csv` | Ego-motion / navigation |
-| Per-pixel depth (mm) | `feature_tracker` → `outputs/.../depth/` | Range to scene / free space |
+| Per-pixel depth (mm) | `feature_tracker` → `outputs/.../depth/` | Range / free space |
 | Point clouds | `outputs/.../pointclouds/*.ply` | 3-D obstacle geometry |
 | Tracked features + IMU | `features/`, `imu/` | Debug VIO health |
 | MAVLink vision pose | `mavlink/` | Feed ArduPilot EKF3 (optional FC) |
 
-**Ready checklist before `run.bat`:**
-
-1. Docker Desktop running (green)
-2. Image built: `docker images oak-d-vio` shows `oak-d-vio:latest`
-3. OAK-D attached to WSL (`attach_oak.bat` / `usbipd list` shows Attached)
-4. No other app holding the camera (close the Streamlit `camera_check` recorder if it is connected)
-
-After a short run, confirm `outputs\session_*` contains `raw/`, `depth/`, `pose/trajectory.csv`, and `imu/imu_log.csv`.
+After a successful Path B run, confirm `outputs\session_*` contains `raw/`, `depth/`,
+`pose/trajectory.csv`, and `imu/imu_log.csv`.
 
 ---
 
